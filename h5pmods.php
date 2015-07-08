@@ -119,7 +119,7 @@ function h5pmods_alter_styles(&$styles, $libraries, $embed_type) {
     'version' => '?ver=1.3.7' // Cache buster
   );
 }
-add_action('h5p_alter_library_scripts', 'h5pmods_alter_styles', 10, 3);
+add_action('h5p_alter_library_styles', 'h5pmods_alter_styles', 10, 3);
 
 /**
  * Allows other plugins to change the access permission for the
