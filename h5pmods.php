@@ -43,7 +43,18 @@ if (!defined('WPINC')) {
  */
 function h5pmods_alter_semantics(&$semantics, $name, $majorVersion, $minorVersion) {
   if ($name === 'H5P.Collage' && $majorVersion < 1) {
-    $semantics->label = 'Altered Label';
+
+    // Find correct field
+    for ($i = 0, $l = count($semantics); $i < $l; $i++) {
+      $field = $semantics[$i];
+
+      if ($field->name === 'collage') {
+
+        // Found our field, change label
+        $field->label = 'Altered Label';
+        return;
+      }
+    }
   }
 }
 add_action('h5p_alter_library_semantics', 'h5pmods_alter_semantics', 10, 4);
@@ -82,7 +93,8 @@ add_action('h5p_alter_filtered_parameters', 'h5pmods_alter_parameters', 10, 4);
 function h5pmods_alter_scripts(&$scripts, $libraries, $embed_type) {
   if (isset($libraries['H5P.DragQuestion'])) {
     $scripts[] = (object) array(
-      'path' => 'score-tracking.js', // Relative to wp-content/uploads/
+      // Path can be relative to wp-content/uploads/h5p or absolute.
+      'path' => '/score-tracking.js',
       'version' => '?ver=1.2.3' // Cache buster
     );
   }
@@ -102,7 +114,8 @@ add_action('h5p_alter_library_scripts', 'h5pmods_alter_scripts', 10, 3);
  */
 function h5pmods_alter_styles(&$styles, $libraries, $embed_type) {
   $styles[] = (object) array(
-    'path' => 'http://mydomain.org/custom-h5p-styling.css', // Absolute path
+    // Path can be relative to wp-content/uploads/h5p or absolute.
+    'path' => 'http://mydomain.org/custom-h5p-styling.css',
     'version' => '?ver=1.3.7' // Cache buster
   );
 }
