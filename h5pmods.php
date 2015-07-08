@@ -107,3 +107,21 @@ function h5pmods_alter_styles(&$styles, $libraries, $embed_type) {
   );
 }
 add_action('h5p_alter_library_scripts', 'h5pmods_alter_styles', 10, 3);
+
+/**
+ * Allows other plugins to change the access permission for the
+ * embedded iframe's content.
+ *
+ * In this example we make sure that content with id 1 always can be embedded.
+ *
+ * @param bool $access
+ * @param int $content_id
+ * @return bool New access permission
+ */
+function h5pmods_embed_access($access, $content_id) {
+  if ($content_id === '1') {
+    $access = TRUE;
+  }
+  return $access;
+}
+add_filter('h5p_embed_access', 'h5pmods_embed_access', 10, 2);
