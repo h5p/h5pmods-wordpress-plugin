@@ -138,3 +138,22 @@ function h5pmods_embed_access($access, $content_id) {
   return $access;
 }
 add_filter('h5p_embed_access', 'h5pmods_embed_access', 10, 2);
+
+/**
+ * Allows you to alter a user's score before it's saved, or you can use this
+ * action to send the score to another system or plugin.
+ *
+ * @param object &$data Has the following properties score,max_score,opened,finished,time
+ * @param int $result_id Only set if updating result
+ * @param int $content_id Identifier of the H5P Content
+ * @param int $user_id Identfieri of the User
+ */
+function h5pmods_alter_user_result(&$data, $result_id, $content_id, $user_id) {
+
+  // Here we can send the results data to another plugin, or we can make sure
+  // that the admin always get a full score:
+  if (current_user_can('disable_h5p_security')) {
+    $data['score'] = $data['max_score'];
+  }
+}
+add_filter('h5p_alter_user_result', 'h5pmods_alter_user_result', 10, 4);
