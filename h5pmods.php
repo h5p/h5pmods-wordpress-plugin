@@ -105,8 +105,17 @@ add_action('h5p_alter_library_scripts', 'h5pmods_alter_scripts', 10, 3);
  * Allows you to alter which stylesheets are loaded for H5P. This is
  * useful for adding your own custom styles or replacing existing once.
  *
- * In this example we're going add a custom script which keeps track of the
- * scoring for drag 'n drop tasks.
+ * The path can be relative to wp-content/uploads/h5p, so
+ * 'path' => '/mystyles.css',
+ * would try to load wp-content/uploads/h5p/mystyles.css
+ *
+ * The path can be absolute, so
+ * 'path' => 'http://mydomain.org/custom-h5p-styling.css',
+ * would to try to load the styles from the URL
+ *
+ * The path can be retrieved using WordPress functions, so for instance
+ * 'path' => plugin_dir_url( __FILE__ ) . 'styles/general.css',
+ * will try to load styles/general.css inside this plugin's folder
  *
  * @param object &styles List of stylesheets that will be loaded.
  * @param array $libraries The libraries which the styles belong to.
@@ -114,8 +123,11 @@ add_action('h5p_alter_library_scripts', 'h5pmods_alter_scripts', 10, 3);
  */
 function h5pmods_alter_styles(&$styles, $libraries, $embed_type) {
   $styles[] = (object) array(
-    // Path can be relative to wp-content/uploads/h5p or absolute.
-    'path' => 'http://mydomain.org/custom-h5p-styling.css',
+    /*
+     * Path can be relative to wp-content/uploads/h5p or absolute or set using
+     * WordPress functions
+     */
+    'path' => plugin_dir_url( __FILE__ ) . 'styles/general.css',
     'version' => '?ver=1.3.7' // Cache buster
   );
 }
