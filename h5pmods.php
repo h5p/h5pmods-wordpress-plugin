@@ -32,9 +32,10 @@ if (!defined('WPINC')) {
 /**
  * Allows you to alter the H5P library semantics, i.e. changing how the
  * editor looks and how content parameters are filtered.
+ * Details on semantics structure: {@link} https://h5p.org/semantics
  *
- * In this example we change the preview label for the collage tool where
- * version is < 1.0.0.
+ * In this example we change the text label for multiple choice questions and
+ * the default value for the "Show Solution" button where the version is < 2.0.0
  *
  * @param object &$semantics The same as in semantics.json
  * @param string $name The machine readable name of the library.
@@ -42,18 +43,25 @@ if (!defined('WPINC')) {
  * @param int $minorVersion Second part of the version number.
  */
 function h5pmods_alter_semantics(&$semantics, $name, $majorVersion, $minorVersion) {
-  if ($name === 'H5P.Collage' && $majorVersion < 1) {
+  if ($name === 'H5P.MultiChoice' && $majorVersion < 2) {
 
-    // Find correct field
-    for ($i = 0, $l = count($semantics); $i < $l; $i++) {
-      $field = $semantics[$i];
+    /*
+     * Change the "text" label of answer options to "Option text"
+     * Note that find_semantics_path expects the full path to a field
+     */
+    $options_text = find_semantics_path('answers/answer/text', $semantics);
+    if (isset($options_text)) {
+      $options_text->label = 'Option text';
+    }
 
-      if ($field->name === 'collage') {
-
-        // Found our field, change label
-        $field->label = 'Altered Label';
-        return;
-      }
+    /*
+     * Hide the "Show Solution" button by default (for new content)
+     * Note that find_semantics_field expects the field name only and retrieves
+     * the first field of that name found.
+     */
+    $enableSolutionsButton = find_semantics_field('enableSolutionsButton', $semantics);
+    if (isset($enableSolutionsButton)) {
+      $enableSolutionsButton->default = false;
     }
   }
 }
@@ -181,3 +189,96 @@ function h5pmods_alter_user_result(&$data, $result_id, $content_id, $user_id) {
   }
 }
 add_filter('h5p_alter_user_result', 'h5pmods_alter_user_result', 10, 4);
+
+/*
+ * ============================================================================
+ * Utility functions
+ * ============================================================================
+ */
+
+/**
+ * Find semantics for a particular path/field.
+ *
+ * Helps to retrieve a specific field in semantics that is identified by its
+ * path including the field name.
+ *
+ * @param string $path Path/field to find, use / to separate levels.
+ * @param object &$semantics Reference to semantics to look in.
+ * @return object|null Semantics field or null if not found.
+ */
+function find_semantics_path($path, &$semantics) {
+	// Sanitization for user convenience
+	$path = (substr($path, 0, 1) === '/') ? substr($path, 1) : $path;
+	$path = (substr($path, -1) === '/') ? substr($path, 0, -1) : $path;
+
+	$path_segments = explode('/', $path);
+
+	if (!is_object($semantics)) {
+		// Array
+		foreach($semantics as $object) {
+			if ($object->name === $path_segments[0]) {
+				return find_semantics_path($path, $object);
+			}
+		}
+	}
+	elseif (sizeof($path_segments) === 1 && $path_segments[0] === $semantics->name) {
+		// Found
+		return $semantics;
+	}
+	elseif (isset($semantics->field)) {
+		// List
+		array_shift($path_segments);
+		$path_short = implode($path_segments, '/');
+		return find_semantics_path($path_short, $semantics->field);
+	}
+	elseif (isset($semantics->fields)) {
+		// Group
+    array_shift($path_segments);
+    $path_short = implode($path_segments, '/');
+    return find_semantics_path($path_short, $semantics->fields);
+	}
+	else {
+		// Not found
+		return null;
+	}
+}
+
+/**
+ * Find semantics for first matching field.
+ *
+ * Helps to retrieve a specific field in semantics but will only return the
+ * first match if there are multiple fields bearing the same name.
+ *
+ * @param string $field Field to find.
+ * @param object &$semantics Reference to semantics to look in.
+ * @return object|null Semantics field or null if not found.
+ */
+function find_semantics_field($field, &$semantics) {
+	if (!is_object($semantics)) {
+		// Array
+		$found = null;
+		foreach($semantics as $object) {
+			$found = find_semantics_field($field, $object);
+			if ($found !== null) {
+				break; // Return first matching field
+			}
+		}
+		return $found;
+	}
+	elseif ($semantics->name === $field) {
+		// Found
+		return $semantics;
+	}
+	elseif (isset($semantics->field)) {
+		// List
+		return find_semantics_field($field, $semantics->field);
+	}
+	elseif (isset($semantics->fields)) {
+		// Group
+		return find_semantics_field($field, $semantics->fields);
+	}
+	else {
+		// Not found
+		return null;
+	}
+}
