@@ -86,6 +86,18 @@ add_action('h5p_alter_filtered_parameters', 'h5pmods_alter_parameters', 10, 4);
  * In this example we're going add a custom script which keeps track of the
  * scoring for drag 'n drop tasks.
  *
+ * The path can be relative to wp-content/uploads/h5p, so
+ * 'path' => '/score-tracking.js',
+ * would try to load wp-content/uploads/h5p/score-tracking.js
+ *
+ * The path can be absolute, so
+ * 'path' => 'http://mydomain.org/score-tracking.js',
+ * would to try to load the script from the URL
+ *
+ * The path can be retrieved using WordPress functions, so for instance
+ * 'path' => plugin_dir_url( __FILE__ ) . 'scripts/score-tracking.js',
+ * will try to load scripts/score-tracking.js inside this plugin's folder
+ *
  * @param object &$scripts List of JavaScripts that will be loaded.
  * @param array $libraries The libraries which the scripts belong to.
  * @param string $embed_type Possible values are: div, iframe, external, editor.
@@ -94,7 +106,7 @@ function h5pmods_alter_scripts(&$scripts, $libraries, $embed_type) {
   if (isset($libraries['H5P.DragQuestion'])) {
     $scripts[] = (object) array(
       // Path can be relative to wp-content/uploads/h5p or absolute.
-      'path' => '/score-tracking.js',
+      'path' => plugin_dir_url( __FILE__ ) . 'scripts/score-tracking.js',
       'version' => '?ver=1.2.3' // Cache buster
     );
   }
