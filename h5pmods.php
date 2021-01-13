@@ -207,40 +207,40 @@ add_filter('h5p_alter_user_result', 'h5pmods_alter_user_result', 10, 4);
  * @return object|null Semantics field or null if not found.
  */
 function find_semantics_path($path, &$semantics) {
-	// Sanitization for user convenience
-	$path = (substr($path, 0, 1) === '/') ? substr($path, 1) : $path;
-	$path = (substr($path, -1) === '/') ? substr($path, 0, -1) : $path;
+  // Sanitization for user convenience
+  $path = (substr($path, 0, 1) === '/') ? substr($path, 1) : $path;
+  $path = (substr($path, -1) === '/') ? substr($path, 0, -1) : $path;
 
-	$path_segments = explode('/', $path);
+  $path_segments = explode('/', $path);
 
-	if (!is_object($semantics)) {
-		// Array
-		foreach($semantics as $object) {
-			if ($object->name === $path_segments[0]) {
-				return find_semantics_path($path, $object);
-			}
-		}
-	}
-	elseif (sizeof($path_segments) === 1 && $path_segments[0] === $semantics->name) {
-		// Found
-		return $semantics;
-	}
-	elseif (isset($semantics->field)) {
-		// List
-		array_shift($path_segments);
-		$path_short = implode($path_segments, '/');
-		return find_semantics_path($path_short, $semantics->field);
-	}
-	elseif (isset($semantics->fields)) {
-		// Group
+  if (!is_object($semantics)) {
+    // Array
+    foreach($semantics as $object) {
+      if ($object->name === $path_segments[0]) {
+        return find_semantics_path($path, $object);
+      }
+    }
+  }
+  elseif (sizeof($path_segments) === 1 && $path_segments[0] === $semantics->name) {
+    // Found
+    return $semantics;
+  }
+  elseif (isset($semantics->field)) {
+    // List
+    array_shift($path_segments);
+    $path_short = implode($path_segments, '/');
+    return find_semantics_path($path_short, $semantics->field);
+  }
+  elseif (isset($semantics->fields)) {
+    // Group
     array_shift($path_segments);
     $path_short = implode($path_segments, '/');
     return find_semantics_path($path_short, $semantics->fields);
-	}
-	else {
-		// Not found
-		return null;
-	}
+  }
+  else {
+    // Not found
+    return null;
+  }
 }
 
 /**
@@ -254,31 +254,31 @@ function find_semantics_path($path, &$semantics) {
  * @return object|null Semantics field or null if not found.
  */
 function find_semantics_field($field, &$semantics) {
-	if (!is_object($semantics)) {
-		// Array
-		$found = null;
-		foreach($semantics as $object) {
-			$found = find_semantics_field($field, $object);
-			if ($found !== null) {
-				break; // Return first matching field
-			}
-		}
-		return $found;
-	}
-	elseif ($semantics->name === $field) {
-		// Found
-		return $semantics;
-	}
-	elseif (isset($semantics->field)) {
-		// List
-		return find_semantics_field($field, $semantics->field);
-	}
-	elseif (isset($semantics->fields)) {
-		// Group
-		return find_semantics_field($field, $semantics->fields);
-	}
-	else {
-		// Not found
-		return null;
-	}
+  if (!is_object($semantics)) {
+    // Array
+    $found = null;
+    foreach($semantics as $object) {
+      $found = find_semantics_field($field, $object);
+      if ($found !== null) {
+        break; // Return first matching field
+      }
+    }
+    return $found;
+  }
+  elseif ($semantics->name === $field) {
+    // Found
+    return $semantics;
+  }
+  elseif (isset($semantics->field)) {
+    // List
+    return find_semantics_field($field, $semantics->field);
+  }
+  elseif (isset($semantics->fields)) {
+    // Group
+    return find_semantics_field($field, $semantics->fields);
+  }
+  else {
+    // Not found
+    return null;
+  }
 }
