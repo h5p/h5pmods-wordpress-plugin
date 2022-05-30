@@ -75,7 +75,7 @@ add_action('h5p_alter_library_semantics', 'h5pmods_alter_semantics', 10, 4);
  * In this example we add a paragraph to the question text on all the multiple
  * choice tasks.
  *
- * @param object &$paramters The content input used to "start" the library.
+ * @param object &$parameters The content input used to "start" the library.
  * @param string $name The machine readable name of the library.
  * @param int $majorVersion First part of the version number.
  * @param int $minorVersion Second part of the version number.
