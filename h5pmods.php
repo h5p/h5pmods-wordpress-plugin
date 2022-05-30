@@ -228,13 +228,13 @@ function find_semantics_path($path, &$semantics) {
   elseif (isset($semantics->field)) {
     // List
     array_shift($path_segments);
-    $path_short = implode($path_segments, '/');
+    $path_short = implode('/', $path_segments);
     return find_semantics_path($path_short, $semantics->field);
   }
   elseif (isset($semantics->fields)) {
     // Group
     array_shift($path_segments);
-    $path_short = implode($path_segments, '/');
+    $path_short = implode('/', $path_segments);
     return find_semantics_path($path_short, $semantics->fields);
   }
   else {
